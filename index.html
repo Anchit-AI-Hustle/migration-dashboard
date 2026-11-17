@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migration Command Center: globaliconnect.com</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        forest: {
+                            50: '#f0f7f4',
+                            100: '#d9ece3',
+                            600: '#046c41',
+                            700: '#004A2B',
+                            800: '#003820',
+                            900: '#002616',
+                        },
+                        gold: {
+                            50: '#fbf8f1',
+                            100: '#f5eedc',
+                            400: '#c7a45e',
+                            500: '#AB8743',
+                            600: '#8e6e32',
+                        },
+                        charcoal: '#171717',
+                        canvas: '#F8F9FA',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom subtle scrollbar and smooth transitions */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F3F5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+        .step-card {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .step-card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 74, 43, 0.06), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+        }
+    </style>
+</head>
+<body class="bg-canvas text-charcoal font-sans antialiased selection:bg-forest-100 selection:text-forest-900">
+
+    <!-- Top Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Custom Confirmation Modal (Replaces native confirm) -->
+    <div id="reset-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+            <div class="flex items-center gap-3 text-amber-600 mb-3">
+                <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <h3 class="text-lg font-bold text-charcoal">Reset Migration Progress?</h3>
+            </div>
+            <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+                This will uncheck all completed tasks and clear your saved notes/credentials log in this browser. Make sure you have exported a summary report first if needed.
+            </p>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeResetModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Cancel</button>
+                <button onclick="confirmResetProgress()" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs transition">Yes, Reset Everything</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header & Overall Progress Tracker -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-2xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <!-- Title & Subtitle -->
+                <div class="flex items-start gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-forest-700 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-charcoal">Migration Command Center: <span class="text-forest-700 font-mono text-lg sm:text-xl">globaliconnect.com</span></h1>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gold-100 text-gold-600 border border-gold-400/30">
+                                Zero-Downtime Plan
+                            </span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Website Backup & Free Hosting + Google Workspace Email Migration (linked to <span class="font-medium text-slate-700">excelanytime.com</span>)</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons & KPI Strip -->
+                <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                    <button onclick="exportMarkdownReport()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-forest-700 text-white hover:bg-forest-800 shadow-xs transition cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                        Export Progress Report
+                    </button>
+                    <button onclick="openResetModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer" title="Reset all progress">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span class="hidden sm:inline">Reset</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Overall Progress Bar Strip -->
+            <div class="mt-4 pt-3.5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between text-xs font-semibold mb-1.5">
+                        <span class="text-slate-700 flex items-center gap-2">
+                            Overall Migration Progress
+                            <span id="progress-badge" class="px-2 py-0.5 rounded-md bg-forest-50 text-forest-700 font-mono">0%</span>
+                        </span>
+                        <div class="flex items-center gap-4 text-slate-500">
+                            <span>Completed: <strong id="completed-count" class="text-charcoal">0/12</strong> steps</span>
+                            <span>Est. Remaining: <strong id="remaining-time" class="text-charcoal">~95 min</strong></span>
+                        </div>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="overall-progress-bar" class="h-full bg-gradient-to-r from-forest-700 to-forest-600 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Prominent Safety Warning Banner -->
+        <div class="bg-amber-50/90 border-l-4 border-gold-500 rounded-xl p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gold-100 text-gold-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-charcoal">CRITICAL EXECUTION ORDER: Complete Phase 1 & Email Backup BEFORE Changing DNS or Canceling GoDaddy</h2>
+                    <p class="text-xs sm:text-sm text-slate-700 mt-0.5">
+                        GoDaddy bundles cPanel email with web hosting. If you cancel hosting early, old website files and historical emails will be permanently deleted. Do <strong>not</strong> cancel the <span class="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-amber-200">globaliconnect.com</span> domain name registration—only turn off auto-renew on the <strong>Web Hosting</strong> plan at the very end.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Split View Layout: Left Steps Column (8 cols) + Right Quick-Reference Helper Drawer (4 cols) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- LEFT COLUMN: Navigation, Filters & Step Cards -->
+            <div class="lg:col-span-8 space-y-5">
+
+                <!-- Phase Tabs & Filter Bar -->
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs space-y-3.5">
+                    <!-- Phase Navigation Tabs -->
+                    <div class="flex flex-wrap gap-1.5 bg-slate-100/80 p-1.5 rounded-xl" role="tablist">
+                        <button onclick="setPhaseFilter('all')" id="tab-all" class="phase-tab flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition bg-white text-forest-700 shadow-2xs cursor-pointer">
+                            All Phases <span class="ml-1 text-xs opacity-75" id="count-all">(12)</span>
+                        </button>
+                        <button onclick="setPhaseFilter('phase1')" id="tab-phase1" class="phase-tab flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-charcoal transition cursor-pointer">
+                            1. Website Backup & Host <span class="ml-1 text-xs opacity-75" id="count-phase1">(4)</span>
+                        </button>
+                        <button onclick="setPhaseFilter('phase2')" id="tab-phase2" class="phase-tab flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-charcoal transition cursor-pointer">
+                            2. Google Workspace Email <span class="ml-1 text-xs opacity-75" id="count-phase2">(5)</span>
+                        </button>
+                        <button onclick="setPhaseFilter('phase3')" id="tab-phase3" class="phase-tab flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-charcoal transition cursor-pointer">
+                            3. DNS Cutover & Cleanup <span class="ml-1 text-xs opacity-75" id="count-phase3">(3)</span>
+                        </button>
+                    </div>
+
+                    <!-- Search & Status Filter Row -->
+                    <div class="flex flex-col sm:flex-row gap-2.5 justify-between">
+                        <div class="relative flex-1">
+                            <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            <input type="text" id="search-input" oninput="renderSteps()" placeholder="Search steps, DNS records, cPanel, MX, SPF..." class="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-forest-700/20 focus:border-forest-700 transition">
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200 self-start sm:self-auto">
+                            <button onclick="setStatusFilter('all')" id="status-all" class="status-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-charcoal shadow-2xs transition cursor-pointer">All</button>
+                            <button onclick="setStatusFilter('pending')" id="status-pending" class="status-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-charcoal transition cursor-pointer">Pending</button>
+                            <button onclick="setStatusFilter('completed')" id="status-completed" class="status-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-charcoal transition cursor-pointer">Completed</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Step Cards Container -->
+                <div id="steps-container" class="space-y-4">
+                    <!-- Populated via JavaScript -->
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Architecture Decision Helper & Quick-Copy DNS Pad -->
+            <aside class="lg:col-span-4 space-y-5 lg:sticky lg:top-36">
+
+                <!-- Architecture Decision Helper Card -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-gold-500"></span>
+                            <h3 class="text-sm font-bold text-charcoal uppercase tracking-wider">Architecture Setup Helper</h3>
+                        </div>
+                        <span class="text-[11px] font-medium text-slate-400">Tailors steps</span>
+                    </div>
+
+                    <!-- Decision 1: Email Setup Mode -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-700 block">1. Google Workspace Email Mode</label>
+                        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl">
+                            <button onclick="setArchitectureChoice('emailMode', 'alias')" id="btn-email-alias" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-white text-forest-700 shadow-2xs transition text-center cursor-pointer">
+                                User Alias ($0 extra)
+                            </button>
+                            <button onclick="setArchitectureChoice('emailMode', 'secondary')" id="btn-email-secondary" class="px-2.5 py-2 rounded-lg text-xs font-medium text-slate-600 hover:text-charcoal transition text-center cursor-pointer">
+                                Secondary Domain
+                            </button>
+                        </div>
+                        <p id="email-mode-desc" class="text-xs text-slate-600 bg-forest-50/70 border border-forest-100 rounded-xl p-2.5 leading-relaxed">
+                            <strong>Recommended ($0 extra/mo):</strong> Emails to <span class="font-mono text-[11px]">@globaliconnect.com</span> land directly inside your existing <span class="font-mono text-[11px]">@excelanytime.com</span> Gmail inbox, and you can reply "From" either address.
+                        </p>
+                    </div>
+
+                    <!-- Decision 2: Website Stack -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-700 block">2. Remaining Website Type</label>
+                        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl">
+                            <button onclick="setArchitectureChoice('siteType', 'static')" id="btn-site-static" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-white text-forest-700 shadow-2xs transition text-center cursor-pointer">
+                                Static HTML/CSS
+                            </button>
+                            <button onclick="setArchitectureChoice('siteType', 'wordpress')" id="btn-site-wordpress" class="px-2.5 py-2 rounded-lg text-xs font-medium text-slate-600 hover:text-charcoal transition text-center cursor-pointer">
+                                WordPress / PHP
+                            </button>
+                        </div>
+                        <p id="site-type-desc" class="text-xs text-slate-600 bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 leading-relaxed">
+                            <strong>Best Free Host:</strong> Deploy directly to <strong>Cloudflare Pages</strong> or <strong>Vercel</strong> (100% free forever, automatic SSL, global CDN, zero server maintenance).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Quick-Reference GoDaddy DNS Copy Pad -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-forest-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <h3 class="text-sm font-bold text-charcoal uppercase tracking-wider">GoDaddy DNS Quick-Copy</h3>
+                        </div>
+                        <span class="text-[11px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded">1-Click Copy</span>
+                    </div>
+
+                    <p class="text-xs text-slate-500">Click any value below to copy it straight to your clipboard when editing DNS in GoDaddy.</p>
+
+                    <!-- DNS Record Cards -->
+                    <div class="space-y-2.5">
+                        <!-- MX Record -->
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-forest-700 bg-forest-50 px-2 py-0.5 rounded">MX Record (Google Email)</span>
+                                <span class="text-[11px] font-mono text-slate-500">Host: @ | Priority: 1</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200">
+                                <code class="text-xs font-mono text-charcoal truncate">SMTP.GOOGLE.COM</code>
+                                <button onclick="copyText('SMTP.GOOGLE.COM', 'MX Record')" class="text-xs font-semibold text-forest-700 hover:text-forest-800 shrink-0 px-2 py-0.5 rounded hover:bg-forest-50 transition cursor-pointer">Copy</button>
+                            </div>
+                        </div>
+
+                        <!-- SPF TXT Record -->
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-forest-700 bg-forest-50 px-2 py-0.5 rounded">TXT Record (SPF Anti-Spam)</span>
+                                <span class="text-[11px] font-mono text-slate-500">Host: @</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200">
+                                <code class="text-xs font-mono text-charcoal truncate">v=spf1 include:_spf.google.com ~all</code>
+                                <button onclick="copyText('v=spf1 include:_spf.google.com ~all', 'SPF Record')" class="text-xs font-semibold text-forest-700 hover:text-forest-800 shrink-0 px-2 py-0.5 rounded hover:bg-forest-50 transition cursor-pointer">Copy</button>
+                            </div>
+                        </div>
+
+                        <!-- Hosting DNS Placeholder / Helper -->
+                        <div id="hosting-dns-card" class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-gold-600 bg-gold-50 px-2 py-0.5 rounded">CNAME (Free Web Host)</span>
+                                <span class="text-[11px] font-mono text-slate-500">Host: www</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200">
+                                <code id="host-cname-example" class="text-xs font-mono text-charcoal truncate">globaliconnect.pages.dev</code>
+                                <button onclick="copyText(document.getElementById('host-cname-example').innerText, 'CNAME Target')" class="text-xs font-semibold text-forest-700 hover:text-forest-800 shrink-0 px-2 py-0.5 rounded hover:bg-forest-50 transition cursor-pointer">Copy</button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Admin Links -->
+                        <div class="pt-1 grid grid-cols-2 gap-2">
+                            <button onclick="copyText('https://admin.google.com', 'Google Admin URL')" class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                                <span>Copy Admin URL</span>
+                            </button>
+                            <button onclick="copyText('public_html', 'cPanel Folder Path')" class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                                <span>Copy public_html</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // 1. DATA MODEL: MIGRATION STEPS
+        // ==========================================
+        const MIGRATION_STEPS = [
+            // PHASE 1: WEBSITE BACKUP & FREE HOSTING
+            {
+                id: 'step-1-1',
+                phase: 'phase1',
+                phaseLabel: 'Phase 1: Website Backup & Free Hosting',
+                stepNumber: '1.1',
+                title: 'Download Full Website Files Backup from GoDaddy cPanel',
+                duration: '10 min',
+                priority: 'Critical',
+                description: 'Log in to GoDaddy > My Products > Web Hosting > Manage > cPanel Admin. Open File Manager, navigate to the root web directory, select all remaining files, compress them into a single ZIP archive, and download it to your local computer.',
+                copySnippets: [
+                    { label: 'Root Folder Path', value: 'public_html' },
+                    { label: 'Backup Filename Suggestion', value: 'globaliconnect-backup-2026.zip' }
+                ],
+                verificationChecklist: [
+                    'ZIP archive downloaded completely to your computer (check file size > 0 KB).',
+                    'Unzipped locally to confirm index.html (or WordPress wp-content/wp-config.php) is intact.'
+                ],
+                notePlaceholder: 'Record the local folder path where you saved the ZIP backup...'
+            },
+            {
+                id: 'step-1-2',
+                phase: 'phase1',
+                phaseLabel: 'Phase 1: Website Backup & Free Hosting',
+                stepNumber: '1.2',
+                title: 'Export MySQL Database (If WordPress / Dynamic Site)',
+                duration: '5 min',
+                priority: 'Conditional',
+                description: 'If the remaining part of the website uses WordPress or PHP with a database, open phpMyAdmin in GoDaddy cPanel, select the website database on the left sidebar, and click Export > Quick > Format: SQL > Go. If the site is purely static HTML/CSS/JS, check this off as N/A.',
+                copySnippets: [
+                    { label: 'cPanel Tool', value: 'phpMyAdmin' }
+                ],
+                verificationChecklist: [
+                    'Confirmed whether the site uses a database (check for wp-config.php in your backup).',
+                    'Downloaded .sql database dump alongside your ZIP file (or verified site is 100% static HTML).'
+                ],
+                notePlaceholder: 'Note database name or confirm "Site is static HTML only"...'
+            },
+            {
+                id: 'step-1-3',
+                phase: 'phase1',
+                phaseLabel: 'Phase 1: Website Backup & Free Hosting',
+                stepNumber: '1.3',
+                title: 'Deploy Website to Free Hosting (Cloudflare Pages / Vercel)',
+                duration: '15 min',
+                priority: 'High',
+                description: 'Create a free account on Cloudflare Pages (dash.cloudflare.com) or Vercel (vercel.com). Upload your unzipped static website folder (ensure index.html is at the top level). If converting a small WordPress site, use the "Simply Static" plugin first to export clean HTML/CSS/JS.',
+                copySnippets: [
+                    { label: 'Cloudflare Dashboard', value: 'https://dash.cloudflare.com' },
+                    { label: 'Vercel Dashboard', value: 'https://vercel.com/new' }
+                ],
+                verificationChecklist: [
+                    'Project deployed and assigned a free preview URL (e.g., globaliconnect.pages.dev).',
+                    'Opened preview URL in browser and verified all pages, images, and links load properly.'
+                ],
+                notePlaceholder: 'Paste your new Cloudflare Pages or Vercel preview URL here...'
+            },
+            {
+                id: 'step-1-4',
+                phase: 'phase1',
+                phaseLabel: 'Phase 1: Website Backup & Free Hosting',
+                stepNumber: '1.4',
+                title: 'Configure Custom Domain in New Free Host',
+                duration: '5 min',
+                priority: 'High',
+                description: 'Inside your Cloudflare Pages or Vercel project settings, go to Custom Domains and add globaliconnect.com and www.globaliconnect.com. Copy the exact A Record IP address and CNAME target they display (we will apply these in Phase 3).',
+                copySnippets: [
+                    { label: 'Primary Domain', value: 'globaliconnect.com' },
+                    { label: 'WWW Subdomain', value: 'www.globaliconnect.com' }
+                ],
+                verificationChecklist: [
+                    'Added both root (globaliconnect.com) and www subdomain in the new host dashboard.',
+                    'Saved the required A Record IP and CNAME target values in the notes box below.'
+                ],
+                notePlaceholder: 'Paste the A Record IP and CNAME value provided by Cloudflare/Vercel here...'
+            },
+
+            // PHASE 2: EMAIL MIGRATION TO GOOGLE WORKSPACE
+            {
+                id: 'step-2-1',
+                phase: 'phase2',
+                phaseLabel: 'Phase 2: Google Workspace Email Migration',
+                stepNumber: '2.1',
+                title: 'Add globaliconnect.com to Existing Google Workspace Account',
+                duration: '5 min',
+                priority: 'Critical',
+                description: 'Sign in to Google Admin Console using your existing excelanytime.com super-admin account. Go to Account > Domains > Manage domains > Add a domain. Enter globaliconnect.com and choose "User alias domain" ($0 extra, delivers to existing inbox) or "Secondary domain" (separate paid user inbox).',
+                copySnippets: [
+                    { label: 'Google Admin Console', value: 'https://admin.google.com' },
+                    { label: 'Domain to Add', value: 'globaliconnect.com' }
+                ],
+                verificationChecklist: [
+                    'Logged into admin.google.com under excelanytime.com admin.',
+                    'Added globaliconnect.com and copied the Google site-verification TXT record.'
+                ],
+                notePlaceholder: 'Paste the google-site-verification=... TXT value here...'
+            },
+            {
+                id: 'step-2-2',
+                phase: 'phase2',
+                phaseLabel: 'Phase 2: Google Workspace Email Migration',
+                stepNumber: '2.2',
+                title: 'Verify Domain Ownership via GoDaddy DNS TXT Record',
+                duration: '5 min',
+                priority: 'High',
+                description: 'Open GoDaddy DNS Management for globaliconnect.com. Add a new TXT record with Host "@", paste the google-site-verification string from Step 2.1, and save. Return to Google Admin Console and click Verify.',
+                copySnippets: [
+                    { label: 'DNS Record Type', value: 'TXT' },
+                    { label: 'DNS Host / Name', value: '@' }
+                ],
+                verificationChecklist: [
+                    'TXT record added to GoDaddy DNS (do NOT touch MX records yet).',
+                    'Google Admin Console shows globaliconnect.com status as "Verified".'
+                ],
+                notePlaceholder: 'Note verification timestamp or any DNS propagation notes...'
+            },
+            {
+                id: 'step-2-3',
+                phase: 'phase2',
+                phaseLabel: 'Phase 2: Google Workspace Email Migration',
+                stepNumber: '2.3',
+                title: 'Assign User Alias or Create New User Mailbox',
+                duration: '5 min',
+                priority: 'High',
+                description: 'If using a User Alias Domain, Google automatically creates aliases for existing users (e.g., dad@globaliconnect.com -> dad@excelanytime.com). In Gmail Settings > Accounts > "Send mail as", add the @globaliconnect.com address so your dad can reply from it seamlessly.',
+                copySnippets: [
+                    { label: 'Gmail Send-As Path', value: 'Settings > See all settings > Accounts > Send mail as' }
+                ],
+                verificationChecklist: [
+                    'Confirmed alias or user account appears active in Google Admin > Directory > Users.',
+                    'Configured "Send mail as" in Gmail so outgoing emails can use @globaliconnect.com.'
+                ],
+                notePlaceholder: 'List the exact @globaliconnect.com email addresses configured...'
+            },
+            {
+                id: 'step-2-4',
+                phase: 'phase2',
+                phaseLabel: 'Phase 2: Google Workspace Email Migration',
+                stepNumber: '2.4',
+                title: 'Migrate Old Historical Emails Before Cutting Over DNS',
+                duration: '20 min',
+                priority: 'Critical',
+                description: 'Before changing MX records or canceling GoDaddy, import old emails from GoDaddy Webmail/cPanel into Gmail. Go to Google Admin Console > Account > Data migration (IMAP) OR Gmail Settings > Accounts and Import > Import mail and contacts.',
+                copySnippets: [
+                    { label: 'GoDaddy IMAP Server', value: 'imap.secureserver.net' },
+                    { label: 'IMAP SSL Port', value: '993' }
+                ],
+                verificationChecklist: [
+                    'Connected old GoDaddy email account via IMAP/POP3.',
+                    'Verified historical inbox and sent emails have finished importing into Gmail.'
+                ],
+                notePlaceholder: 'Note old GoDaddy email server settings or migration completion count...'
+            },
+            {
+                id: 'step-2-5',
+                phase: 'phase2',
+                phaseLabel: 'Phase 2: Google Workspace Email Migration',
+                stepNumber: '2.5',
+                title: 'Point globaliconnect.com MX & SPF Records to Google',
+                duration: '10 min',
+                priority: 'Critical',
+                description: 'In GoDaddy DNS Management for globaliconnect.com, delete all old MX records (secureserver.net / outlook) and add Google\'s MX record. Also add/update the SPF TXT record so emails from @globaliconnect.com pass spam checks.',
+                copySnippets: [
+                    { label: 'MX Value (Priority 1, Host @)', value: 'SMTP.GOOGLE.COM' },
+                    { label: 'SPF TXT Value (Host @)', value: 'v=spf1 include:_spf.google.com ~all' }
+                ],
+                verificationChecklist: [
+                    'Removed old GoDaddy MX records and saved SMTP.GOOGLE.COM (Priority 1).',
+                    'Sent a test email from a separate personal account to @globaliconnect.com and received it in Gmail.'
+                ],
+                notePlaceholder: 'Confirm test email sent and received timestamp...'
+            },
+
+            // PHASE 3: FINAL DNS CUTOVER & GODADDY CLEANUP
+            {
+                id: 'step-3-1',
+                phase: 'phase3',
+                phaseLabel: 'Phase 3: Final DNS Cutover & GoDaddy Cleanup',
+                stepNumber: '3.1',
+                title: 'Update Website A & CNAME Records to Point to Free Host',
+                duration: '5 min',
+                priority: 'High',
+                description: 'In GoDaddy DNS Management, edit the "@" A Record to point to your new free host\'s IP address (from Step 1.4) and update the "www" CNAME record to point to your Cloudflare Pages / Vercel domain. Leave your new Google MX and TXT records untouched!',
+                copySnippets: [
+                    { label: 'WWW CNAME Host', value: 'www' },
+                    { label: 'Root A Record Host', value: '@' }
+                ],
+                verificationChecklist: [
+                    'Updated A (@) and CNAME (www) records in GoDaddy DNS.',
+                    'Verified Google MX and TXT records were NOT accidentally modified.'
+                ],
+                notePlaceholder: 'Record the final A and CNAME values saved in GoDaddy...'
+            },
+            {
+                id: 'step-3-2',
+                phase: 'phase3',
+                phaseLabel: 'Phase 3: Final DNS Cutover & GoDaddy Cleanup',
+                stepNumber: '3.2',
+                title: '24-Hour Live Verification (Website SSL + Email Delivery)',
+                duration: '10 min',
+                priority: 'High',
+                description: 'Open https://globaliconnect.com in an incognito browser window to confirm the site loads from your new free host with a valid SSL padlock. Send and reply to test emails from @globaliconnect.com to verify both inbound and outbound delivery.',
+                copySnippets: [
+                    { label: 'Live HTTPS URL', value: 'https://globaliconnect.com' },
+                    { label: 'Google Workspace MX Check', value: 'https://toolbox.googleapps.com/apps/checkmx/' }
+                ],
+                verificationChecklist: [
+                    'https://globaliconnect.com loads fast with valid SSL certificate.',
+                    'Inbound and outbound emails work smoothly with zero bounce-backs.'
+                ],
+                notePlaceholder: 'Log final verification test results...'
+            },
+            {
+                id: 'step-3-3',
+                phase: 'phase3',
+                phaseLabel: 'Phase 3: Final DNS Cutover & GoDaddy Cleanup',
+                stepNumber: '3.3',
+                title: 'Turn Off Auto-Renew on GoDaddy Web Hosting (Keep Domain!)',
+                duration: '5 min',
+                priority: 'Critical',
+                description: 'Once website and email have run smoothly for 24–48 hours, log in to GoDaddy > Account Settings > Renewals & Billing. Locate ONLY the "Web Hosting" product and turn OFF Auto-Renew (or cancel hosting). Keep your globaliconnect.com Domain Registration active!',
+                copySnippets: [
+                    { label: 'GoDaddy Renewals Page', value: 'https://account.godaddy.com/subscriptions' }
+                ],
+                verificationChecklist: [
+                    'Web Hosting subscription set to "Auto-Renew: Off" (will not charge again).',
+                    'Confirmed globaliconnect.com Domain Name registration remains active and renewed.'
+                ],
+                notePlaceholder: 'Record hosting expiration date and confirmation number...'
+            }
+        ];
+
+        // ==========================================
+        // 2. STATE MANAGEMENT & LOCALSTORAGE
+        // ==========================================
+        const STORAGE_KEY = 'globaliconnect_migration_state_v1';
+
+        let appState = {
+            completedSteps: {},
+            notes: {},
+            expandedNotes: {},
+            phaseFilter: 'all',
+            statusFilter: 'all',
+            architecture: {
+                emailMode: 'alias',
+                siteType: 'static'
+            }
+        };
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    appState = {
+                        ...appState,
+                        ...parsed,
+                        architecture: {
+                            ...appState.architecture,
+                            ...(parsed.architecture || {})
+                        }
+                    };
+                }
+            } catch (e) {
+                console.error('Could not load saved state:', e);
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {
+                console.error('Could not save state:', e);
+            }
+        }
+
+        // ==========================================
+        // 3. INTERACTIVE HANDLERS
+        // ==========================================
+        function toggleStepComplete(stepId) {
+            appState.completedSteps[stepId] = !appState.completedSteps[stepId];
+            saveState();
+            updateProgressUI();
+            renderSteps();
+
+            const step = MIGRATION_STEPS.find(s => s.id === stepId);
+            if (appState.completedSteps[stepId]) {
+                showToast(`Completed Step ${step.stepNumber}: ${step.title}`, 'success');
+            }
+        }
+
+        function toggleNoteDrawer(stepId) {
+            appState.expandedNotes[stepId] = !appState.expandedNotes[stepId];
+            saveState();
+            renderSteps();
+        }
+
+        function updateStepNote(stepId, value) {
+            appState.notes[stepId] = value;
+            saveState();
+        }
+
+        function setPhaseFilter(phase) {
+            appState.phaseFilter = phase;
+            saveState();
+
+            // Update tab UI
+            document.querySelectorAll('.phase-tab').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-forest-700', 'font-semibold', 'shadow-2xs');
+                btn.classList.add('text-slate-600', 'font-medium');
+            });
+            const activeTab = document.getElementById(`tab-${phase}`);
+            if (activeTab) {
+                activeTab.classList.remove('text-slate-600', 'font-medium');
+                activeTab.classList.add('bg-white', 'text-forest-700', 'font-semibold', 'shadow-2xs');
+            }
+
+            renderSteps();
+        }
+
+        function setStatusFilter(status) {
+            appState.statusFilter = status;
+            saveState();
+
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-charcoal', 'font-semibold', 'shadow-2xs');
+                btn.classList.add('text-slate-600', 'font-medium');
+            });
+            const activeBtn = document.getElementById(`status-${status}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600', 'font-medium');
+                activeBtn.classList.add('bg-white', 'text-charcoal', 'font-semibold', 'shadow-2xs');
+            }
+
+            renderSteps();
+        }
+
+        function setArchitectureChoice(key, value) {
+            appState.architecture[key] = value;
+            saveState();
+            applyArchitectureUI();
+        }
+
+        function applyArchitectureUI() {
+            const { emailMode, siteType } = appState.architecture;
+
+            // Email Mode buttons
+            const btnAlias = document.getElementById('btn-email-alias');
+            const btnSec = document.getElementById('btn-email-secondary');
+            const emailDesc = document.getElementById('email-mode-desc');
+
+            if (emailMode === 'alias') {
+                btnAlias.className = 'px-2.5 py-2 rounded-lg text-xs font-semibold bg-white text-forest-700 shadow-2xs transition text-center cursor-pointer';
+                btnSec.className = 'px-2.5 py-2 rounded-lg text-xs font-medium text-slate-600 hover:text-charcoal transition text-center cursor-pointer';
+                emailDesc.innerHTML = '<strong>Recommended ($0 extra/mo):</strong> Emails to <span class="font-mono text-[11px]">@globaliconnect.com</span> land directly inside your existing <span class="font-mono text-[11px]">@excelanytime.com</span> Gmail inbox, and you can reply "From" either address.';
+            } else {
+                btnSec.className = 'px-2.5 py-2 rounded-lg text-xs font-semibold bg-white text-forest-700 shadow-2xs transition text-center cursor-pointer';
+                btnAlias.className = 'px-2.5 py-2 rounded-lg text-xs font-medium text-slate-600 hover:text-charcoal transition text-center cursor-pointer';
+                emailDesc.innerHTML = '<strong>Separate Inbox (~$6–$7/mo):</strong> Creates a completely standalone Google Workspace user license and separate Gmail login for <span class="font-mono text-[11px]">@globaliconnect.com</span>.';
+            }
+
+            // Site Type buttons
+            const btnStatic = document.getElementById('btn-site-static');
+            const btnWp = document.getElementById('btn-site-wordpress');
+            const siteDesc = document.getElementById('site-type-desc');
+            const cnameExample = document.getElementById('host-cname-example');
+
+            if (siteType === 'static') {
+                btnStatic.className = 'px-2.5 py-2 rounded-lg text-xs font-semibold bg-white text-forest-700 shadow-2xs transition text-center cursor-pointer';
+                btnWp.className = 'px-2.5 py-2 rounded-lg text-xs font-medium text-slate-600 hover:text-charcoal transition text-center cursor-pointer';
+                siteDesc.innerHTML = '<strong>Best Free Host:</strong> Deploy directly to <strong>Cloudflare Pages</strong> or <strong>Vercel</strong> (100% free forever, automatic SSL, global CDN, zero server maintenance).';
+                cnameExample.innerText = 'globaliconnect.pages.dev';
+            } else {
+                btnWp.className = 'px-2.5 py-2 rounded-lg text-xs font-semibold bg-white text-forest-700 shadow-2xs transition text-center cursor-pointer';
+                btnStatic.className = 'px-2.5 py-2 rounded-lg text-xs font-medium text-slate-600 hover:text-charcoal transition text-center cursor-pointer';
+                siteDesc.innerHTML = '<strong>Tip for Small Sites:</strong> Use the free <em>Simply Static</em> WordPress plugin to export your remaining pages into static HTML, then host free on <strong>Cloudflare Pages</strong> (or use InfinityFree for live PHP/MySQL).';
+                cnameExample.innerText = 'globaliconnect.pages.dev';
+            }
+        }
+
+        // ==========================================
+        // 4. CLIPBOARD & EXPORT HELPERS
+        // ==========================================
+        function copyText(text, label = 'Value') {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast(`Copied ${label} to clipboard`, 'info');
+            } catch (err) {
+                showToast('Unable to copy text', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function exportMarkdownReport() {
+            const total = MIGRATION_STEPS.length;
+            const completed = MIGRATION_STEPS.filter(s => appState.completedSteps[s.id]).length;
+            const pct = Math.round((completed / total) * 100);
+            const now = new Date().toLocaleString();
+
+            let md = `# Migration Status Report: globaliconnect.com\n`;
+            md += `Generated: ${now}\n`;
+            md += `Overall Progress: ${completed}/${total} tasks completed (${pct}%)\n`;
+            md += `Architecture: Email = ${appState.architecture.emailMode === 'alias' ? 'Google Workspace User Alias ($0 extra)' : 'Secondary Domain'} | Website = ${appState.architecture.siteType === 'static' ? 'Static HTML (Cloudflare Pages / Vercel)' : 'WordPress / PHP'}\n\n`;
+
+            const phases = [
+                { key: 'phase1', title: 'Phase 1: Website Backup & Free Hosting' },
+                { key: 'phase2', title: 'Phase 2: Google Workspace Email Migration' },
+                { key: 'phase3', title: 'Phase 3: Final DNS Cutover & GoDaddy Cleanup' }
+            ];
+
+            phases.forEach(p => {
+                md += `## ${p.title}\n`;
+                MIGRATION_STEPS.filter(s => s.phase === p.key).forEach(step => {
+                    const done = appState.completedSteps[step.id] ? 'x' : ' ';
+                    md += `- [${done}] **Step ${step.stepNumber}: ${step.title}** (${step.duration})\n`;
+                    const note = appState.notes[step.id];
+                    if (note && note.trim()) {
+                        md += `  - *Notes:* ${note.trim().replace(/\n/g, ' ')}\n`;
+                    }
+                });
+                md += `\n`;
+            });
+
+            copyText(md, 'Markdown Progress Report');
+        }
+
+        // ==========================================
+        // 5. MODAL & TOAST UI
+        // ==========================================
+        function openResetModal() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeResetModal() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function confirmResetProgress() {
+            appState.completedSteps = {};
+            appState.notes = {};
+            appState.expandedNotes = {};
+            saveState();
+            closeResetModal();
+            updateProgressUI();
+            renderSteps();
+            showToast('All migration progress and notes have been reset.', 'info');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-forest-700 text-white' : 'bg-charcoal text-white';
+
+            toast.className = `${bgClass} px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium flex items-center gap-2.5 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `
+                <svg class="w-4 h-4 shrink-0 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 2800);
+        }
+
+        // ==========================================
+        // 6. RENDER ENGINE
+        // ==========================================
+        function parseMinutes(durationStr) {
+            const match = durationStr.match(/(\d+)/);
+            return match ? parseInt(match[1], 10) : 0;
+        }
+
+        function updateProgressUI() {
+            const total = MIGRATION_STEPS.length;
+            const completed = MIGRATION_STEPS.filter(s => appState.completedSteps[s.id]).length;
+            const pct = Math.round((completed / total) * 100);
+
+            const remainingMins = MIGRATION_STEPS
+                .filter(s => !appState.completedSteps[s.id])
+                .reduce((acc, s) => acc + parseMinutes(s.duration), 0);
+
+            document.getElementById('progress-badge').innerText = `${pct}%`;
+            document.getElementById('completed-count').innerText = `${completed}/${total}`;
+            document.getElementById('remaining-time').innerText = remainingMins === 0 ? 'Done!' : `~${remainingMins} min`;
+            document.getElementById('overall-progress-bar').style.width = `${pct}%`;
+
+            // Update phase tab counters
+            ['phase1', 'phase2', 'phase3'].forEach(phaseKey => {
+                const phaseSteps = MIGRATION_STEPS.filter(s => s.phase === phaseKey);
+                const phaseDone = phaseSteps.filter(s => appState.completedSteps[s.id]).length;
+                const el = document.getElementById(`count-${phaseKey}`);
+                if (el) el.innerText = `(${phaseDone}/${phaseSteps.length})`;
+            });
+            document.getElementById('count-all').innerText = `(${completed}/${total})`;
+        }
+
+        function getPriorityBadgeHTML(priority) {
+            if (priority === 'Critical') {
+                return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200/80">Critical</span>`;
+            }
+            if (priority === 'Conditional') {
+                return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">If Applicable</span>`;
+            }
+            return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-forest-50 text-forest-700 border border-forest-100">Required</span>`;
+        }
+
+        function renderSteps() {
+            const container = document.getElementById('steps-container');
+            const query = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+
+            const filtered = MIGRATION_STEPS.filter(step => {
+                const isDone = !!appState.completedSteps[step.id];
+
+                if (appState.phaseFilter !== 'all' && step.phase !== appState.phaseFilter) return false;
+                if (appState.statusFilter === 'completed' && !isDone) return false;
+                if (appState.statusFilter === 'pending' && isDone) return false;
+
+                if (query) {
+                    const haystack = [
+                        step.title,
+                        step.description,
+                        step.phaseLabel,
+                        ...(step.copySnippets || []).map(c => `${c.label} ${c.value}`),
+                        ...(step.verificationChecklist || [])
+                    ].join(' ').toLowerCase();
+                    if (!haystack.includes(query)) return false;
+                }
+
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white rounded-2xl p-10 text-center border border-slate-200/80">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        </div>
+                        <h3 class="text-base font-bold text-charcoal">No matching steps found</h3>
+                        <p class="text-sm text-slate-500 mt-1">Try clearing your search filter or switching back to "All Phases".</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            let lastPhase = '';
+
+            filtered.forEach(step => {
+                const isDone = !!appState.completedSteps[step.id];
+                const noteText = appState.notes[step.id] || '';
+                const hasNote = noteText.trim().length > 0;
+                const isNoteOpen = !!appState.expandedNotes[step.id] || hasNote;
+
+                // Phase Section Header when viewing "All Phases"
+                if (appState.phaseFilter === 'all' && step.phase !== lastPhase) {
+                    lastPhase = step.phase;
+                    html += `
+                        <div class="pt-2 pb-1 flex items-center gap-2.5">
+                            <span class="h-2 w-2 rounded-full bg-forest-700"></span>
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500">${step.phaseLabel}</h2>
+                            <div class="flex-1 h-px bg-slate-200"></div>
+                        </div>
+                    `;
+                }
+
+                // Copy Snippets Pills
+                let snippetsHTML = '';
+                if (step.copySnippets && step.copySnippets.length > 0) {
+                    snippetsHTML = `
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            ${step.copySnippets.map(snip => `
+                                <div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200/90 rounded-lg px-2.5 py-1.5 max-w-full">
+                                    <span class="text-[11px] font-medium text-slate-500 shrink-0">${snip.label}:</span>
+                                    <code class="text-xs font-mono text-charcoal truncate">${snip.value}</code>
+                                    <button onclick="copyText('${snip.value.replace(/'/g, "\\'")}', '${snip.label.replace(/'/g, "\\'")}')" class="text-[11px] font-semibold text-forest-700 hover:text-forest-800 bg-white border border-slate-200 px-2 py-0.5 rounded shadow-2xs hover:bg-forest-50 transition shrink-0 cursor-pointer">
+                                        Copy
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                // Verification Checklist Box
+                let verifyHTML = '';
+                if (step.verificationChecklist && step.verificationChecklist.length > 0) {
+                    verifyHTML = `
+                        <div class="mt-3.5 bg-forest-50/50 border border-forest-100 rounded-xl p-3">
+                            <div class="text-[11px] font-bold uppercase tracking-wider text-forest-700 mb-1.5 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Verification Checklist
+                            </div>
+                            <ul class="space-y-1">
+                                ${step.verificationChecklist.map(item => `
+                                    <li class="text-xs text-slate-700 flex items-start gap-2">
+                                        <span class="text-forest-600 font-bold mt-0.5">•</span>
+                                        <span>${item}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <article class="step-card bg-white rounded-2xl p-5 border ${isDone ? 'border-forest-600/40 bg-forest-50/15' : 'border-slate-200/90'} shadow-2xs">
+                        <div class="flex items-start gap-3.5">
+                            <!-- Completion Checkbox -->
+                            <button onclick="toggleStepComplete('${step.id}')" aria-label="Mark step ${step.stepNumber} complete" class="mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition cursor-pointer ${isDone ? 'bg-forest-700 border-forest-700 text-white' : 'border-slate-300 hover:border-forest-700 bg-white'}">
+                                ${isDone ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>` : ''}
+                            </button>
+
+                            <!-- Card Main Body -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-md ${isDone ? 'bg-forest-100 text-forest-800' : 'bg-slate-100 text-slate-700'}">
+                                            Step ${step.stepNumber}
+                                        </span>
+                                        ${getPriorityBadgeHTML(step.priority)}
+                                        <span class="inline-flex items-center gap-1 text-xs text-slate-500 font-medium">
+                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            ${step.duration}
+                                        </span>
+                                    </div>
+
+                                    <!-- Toggle Notes Button -->
+                                    <button onclick="toggleNoteDrawer('${step.id}')" class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg transition cursor-pointer ${hasNote ? 'bg-gold-50 text-gold-600 border border-gold-400/30' : 'text-slate-500 hover:bg-slate-100'}">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        <span>${hasNote ? 'Notes Saved' : 'Add Note'}</span>
+                                    </button>
+                                </div>
+
+                                <h3 class="text-base font-bold mt-2 ${isDone ? 'line-through text-slate-400' : 'text-charcoal'}">
+                                    ${step.title}
+                                </h3>
+
+                                <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
+                                    ${step.description}
+                                </p>
+
+                                ${snippetsHTML}
+                                ${verifyHTML}
+
+                                <!-- Expandable Notes / Credentials Log -->
+                                <div class="${isNoteOpen ? 'block' : 'hidden'} mt-3.5 pt-3 border-t border-slate-100">
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                                        Notes & Temporary DNS / Backup Log (Auto-Saved Locally)
+                                    </label>
+                                    <textarea
+                                        rows="2"
+                                        oninput="updateStepNote('${step.id}', this.value)"
+                                        placeholder="${step.notePlaceholder}"
+                                        class="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-charcoal focus:outline-none focus:ring-2 focus:ring-forest-700/20 focus:border-forest-700 transition"
+                                    >${noteText}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // 7. INITIALIZATION
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            applyArchitectureUI();
+            setPhaseFilter(appState.phaseFilter);
+            setStatusFilter(appState.statusFilter);
+            updateProgressUI();
+            renderSteps();
+        });
+    </script>
+</body>
+</html>
